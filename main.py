@@ -34,5 +34,7 @@ for sommet in list(dic_points.keys()):
     if str(sommet) not in pointsInAretes:
         del dic_points[sommet]
         
+del sommet, temp, way #suppression des variables innutiles
+
 
 matriceAdjacence = pd.DataFrame(index=dic_points.keys(), columns=dic_points.keys())
