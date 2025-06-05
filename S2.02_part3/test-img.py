@@ -389,7 +389,7 @@ def dijkstra_optimise_visuel(depart, arrive, fenetre, positions_pix, lignes):
                 if arc in lignes and lignes[arc].config['fill'] != 'blue': #permet d'éviter de recolorer les arcs déjà colorés
                     lignes[arc].setFill("blue")
                     lignes[arc].setWidth(3)
-                    time.sleep(0.002)
+                    time.sleep(0.02)
                    
 
     # Reconstruction du chemin
@@ -414,138 +414,6 @@ def dijkstra_optimise_visuel(depart, arrive, fenetre, positions_pix, lignes):
 
 
 # -------------------------------
-# Fonction optimiser Bellman
-def Bellman_optimise_visuel(depart, arrive, fenetre, positions_pix, lignes):
-    distances = {s: float('inf') for s in dicSuccDist}
-    distances[depart] = 0
-    previous = {s: None for s in dicSuccDist}
-
-    for _ in range(len(dicSuccDist) - 1):
-        updated = False
-        for u, voisins in dicSuccDist.items():
-            for v, weight in voisins:
-                if distances[u] + weight < distances[v]:
-                    distances[v] = distances[u] + weight
-                    previous[v] = u
-                    arc = (u, v) if (u, v) in lignes else (v, u)
-                    if arc in lignes and lignes[arc].config['fill'] != 'blue':
-                        lignes[arc].setFill("blue")
-                        lignes[arc].setWidth(3)
-                        time.sleep(0.002)
-                    updated = True
-        if not updated:
-            break
-
-    chemin = []
-    courant = arrive
-    while courant is not None:
-        chemin.insert(0, courant)
-        courant = previous[courant]
-
-    for i in range(len(chemin) - 1):
-        u, v = chemin[i], chemin[i+1]
-        arc = (u, v) if (u, v) in lignes else (v, u)
-        if arc in lignes:
-            lignes[arc].setFill("green")
-            lignes[arc].setWidth(5)
-            time.sleep(0.01)
-
-    return chemin, distances[arrive]
-
-# -------------------------------
-# Fonction optimiser BFK 
-def BFK_optimise_visuel(depart, arrive, fenetre, positions_pix, lignes):
-    n = len(dicSucc)
-    listeDist = [float("inf")] * n
-    listeDist[correspSomInd[depart]] = 0
-    pred = [None] * n
-
-    a_traiter = [depart]
-    for _ in range(n):
-        a_traiterFutur = []
-        for u in a_traiter:
-            u_ind = correspSomInd[u]
-            for v, poids in dicSuccDist[u]:
-                v_ind = correspSomInd[v]
-                if listeDist[v_ind] > listeDist[u_ind] + poids:
-                    listeDist[v_ind] = listeDist[u_ind] + poids
-                    pred[v_ind] = u
-                    a_traiterFutur.append(v)
-                    arc = (u, v) if (u, v) in lignes else (v, u)
-                    if arc in lignes and lignes[arc].config['fill'] != 'blue':
-                        lignes[arc].setFill("blue")
-                        lignes[arc].setWidth(3)
-                        time.sleep(0.002)
-        a_traiter = a_traiterFutur
-
-    chemin = []
-    courant = arrive
-    while courant is not None:
-        chemin.insert(0, courant)
-        courant = pred[correspSomInd[courant]]
-
-    for i in range(len(chemin) - 1):
-        u, v = chemin[i], chemin[i+1]
-        arc = (u, v) if (u, v) in lignes else (v, u)
-        if arc in lignes:
-            lignes[arc].setFill("green")
-            lignes[arc].setWidth(5)
-            time.sleep(0.01)
-
-    return chemin, listeDist[correspSomInd[arrive]]
-
-# -------------------------------
-# Fonction optimiser A* avec file de priorité
-def A_Star_optimise_visuel(depart, arrive, fenetre, positions_pix, lignes):
-    distances = {s: float('inf') for s in dicSuccDist}
-    distances[depart] = 0
-    previous = {s: None for s in dicSuccDist}
-    f_scores = {s: float('inf') for s in dicSuccDist}
-    f_scores[depart] = heuristique(depart, arrive)
-
-    ouvert = [(f_scores[depart], depart)]
-    visited = set()
-
-    while ouvert:
-        _, current = heapq.heappop(ouvert)
-        if current in visited:
-            continue
-        visited.add(current)
-
-        if current == arrive:
-            break
-
-        for voisin, poids in dicSuccDist[current]:
-            tentative_g = distances[current] + poids
-            if tentative_g < distances[voisin]:
-                distances[voisin] = tentative_g
-                previous[voisin] = current
-                f_scores[voisin] = tentative_g + heuristique(voisin, arrive)
-                heapq.heappush(ouvert, (f_scores[voisin], voisin))
-                arc = (current, voisin) if (current, voisin) in lignes else (voisin, current)
-                if arc in lignes and lignes[arc].config['fill'] != 'blue':
-                    lignes[arc].setFill("blue")
-                    lignes[arc].setWidth(3)
-                    time.sleep(0.002)
-
-    chemin = []
-    courant = arrive
-    while courant is not None:
-        chemin.insert(0, courant)
-        courant = previous[courant]
-
-    for i in range(len(chemin) - 1):
-        u, v = chemin[i], chemin[i + 1]
-        arc = (u, v) if (u, v) in lignes else (v, u)
-        if arc in lignes:
-            lignes[arc].setFill("green")
-            lignes[arc].setWidth(5)
-            time.sleep(0.01)
-
-    return chemin, distances[arrive]
-
-
-# -------------------------------
 # Fonction pour réinitialiser les couleurs des arcs
 def reset_couleurs(lignes):
     for ligne in lignes.values():
@@ -563,9 +431,6 @@ def main():
     print("  k → BFK (classique)")
     print("  a → A* (classique)")
     print("  o → Dijkstra optimisé")
-    print("  v → Bellman optimisé")
-    print("  l → BFK optimisé")
-    print("  z → A* optimisé")
     print("  Clique n’importe où dans la fenêtre pour quitter.")
 
     while continuer:
@@ -616,30 +481,6 @@ def main():
                 fin = time.perf_counter()
                 print("Chemin Dijkstra optimisé :", chemin)
                 print("Distance Dijkstra optimisé :", dist)
-                print(f"Temps d'exécution : {fin - debut:.6f} secondes")
-
-            elif touche == "v":
-                debut = time.perf_counter()
-                chemin, dist = Bellman_optimise_visuel(388382398, 1888303671, fenetre, positions_pix, lignes)
-                fin = time.perf_counter()
-                print("Chemin Bellman optimisé :", chemin)
-                print("Distance Bellman optimisé :", dist)
-                print(f"Temps d'exécution : {fin - debut:.6f} secondes")
-
-            elif touche == "l":
-                debut = time.perf_counter()
-                chemin, dist = BFK_optimise_visuel(388382398, 1888303671, fenetre, positions_pix, lignes)
-                fin = time.perf_counter()
-                print("Chemin BFK optimisé :", chemin)
-                print("Distance BFK optimisé :", dist)
-                print(f"Temps d'exécution : {fin - debut:.6f} secondes")
-
-            elif touche == "z":
-                debut = time.perf_counter()
-                chemin, dist = A_Star_optimise_visuel(388382398, 1888303671, fenetre, positions_pix, lignes)
-                fin = time.perf_counter()
-                print("Chemin A* optimisé :", chemin)
-                print("Distance A* optimisé :", dist)
                 print(f"Temps d'exécution : {fin - debut:.6f} secondes")
 
             else:
