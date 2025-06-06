@@ -366,8 +366,7 @@ def dijkstra_optimise_visuel(depart, arrive, fenetre, positions_pix, lignes):
 
     ouvert = []
     heapq.heappush(ouvert, (0, depart))
-
-    compteur = 0  # Pour limiter les appels à time.sleep()
+ 
 
     while ouvert:
         _, courant = heapq.heappop(ouvert)
